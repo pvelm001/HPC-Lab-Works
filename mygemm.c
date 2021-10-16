@@ -25,7 +25,7 @@ void dgemm1(const double *A, const double *B, double *C, const int n)
     int i, j, k;
     for (i=0; i<n; i++) { //Iterator for C's Rows
         for (j=0; j<n; j++) { //Iterator for C's Columns
-            register double sum = C[i * n + j]; //Eliminates cache-miss for n reads
+            register double sum = C[i * n + j]; 
             for (k=0; k<n; k++) { //Iterator for A's Columns & B's Rows
                 sum += A[i * n + k] * B[k * n + j];
             }
@@ -147,63 +147,209 @@ void dgemm3(const double *A, const double *B, double *C, const int n)
 //Cache Reuse part 3
 void ijk(const double *A, const double *B, double *C, const int n) 
 {
-
+    int i, j, k;
+    for (i=0; i<n; i++) { 
+        for (j=0; j<n; j++) { 
+            register double sum = C[i * n + j]; 
+            for (k=0; k<n; k++) { //Iterator for A's Columns & B's Rows
+                sum += A[i * n + k] * B[k * n + j];
+            }
+            C[i * n + j] = sum;
+        }
+    }
 }
 
 void bijk(const double *A, const double *B, double *C, const int n, const int b) 
 {
-
+    int i, j, k, i1, j1, k1;
+    for (i=0; i<n; i+=b) { 
+        for (j=0; j<n; j+=b) { 
+            for (k=0; k<n; k+=b) { 
+                /* B x B mini matrix multiplications */
+                for (i1=i; i1<i+b; i1++) { 
+                    for (j1=j; j1<j+b; j1++) { 
+                        register double sum = C[i1 * n + j1];
+                        for (k1=k; k1<k+b; k1++) {
+                            sum += A[i1 * n + k1] * B[k1 * n + j1];
+                        }
+                        C[i1 * n + j1] = sum;
+                    }
+                }
+            }
+        }
+    }
 }
 
 void jik(const double *A, const double *B, double *C, const int n) 
 {
-
+    int i, j, k;
+    for (j=0; j<n; j++) { 
+        for (i=0; i<n; i++) { 
+            register double sum = C[i * n + j]; 
+            for (k=0; k<n; k++) { //Iterator for A's Columns & B's Rows
+                sum += A[i * n + k] * B[k * n + j];
+            }
+            C[i * n + j] = sum;
+        }
+    }
 }
 
 void bjik(const double *A, const double *B, double *C, const int n, const int b) 
 {
-
+    int i, j, k, i1, j1, k1;
+    for (j=0; j<n; j+=b) { 
+        for (i=0; i<n; i+=b) { 
+            for (k=0; k<n; k+=b) { 
+                /* B x B mini matrix multiplications */
+                for (i1=i; i1<i+b; i1++) { 
+                    for (j1=j; j1<j+b; j1++) { 
+                        register double sum = C[i1 * n + j1];
+                        for (k1=k; k1<k+b; k1++) {
+                            sum += A[i1 * n + k1] * B[k1 * n + j1];
+                        }
+                        C[i1 * n + j1] = sum;
+                    }
+                }
+            }
+        }
+    }
 }
 
 void kij(const double *A, const double *B, double *C, const int n) 
 {
-
+    int i, j, k;
+    for (k=0; k<n; k++) { 
+        for (i=0; i<n; i++) { 
+            register double R = A[i * n + k];
+            for (j=0; j<n; j++) { //Iterator for A's Columns & B's Columns
+                C[i * n + j] += R * B[k * n + j];
+            }
+        }
+    }
 }
 
 void bkij(const double *A, const double *B, double *C, const int n, const int b) 
 {
-
+    int i, j, k, i1, j1, k1;
+    for (k=0; k<n; k+=b) { 
+        for (i=0; i<n; i+=b) { 
+            for (j=0; j<n; j+=b) { 
+                /* B x B mini matrix multiplications */
+                for (i1=i; i1<i+b; i1++) { 
+                    for (j1=j; j1<j+b; j1++) { 
+                        register double sum = C[i1 * n + j1];
+                        for (k1=k; k1<k+b; k1++) {
+                            sum += A[i1 * n + k1] * B[k1 * n + j1];
+                        }
+                        C[i1 * n + j1] = sum;
+                    }
+                }
+            }
+        }
+    }
 }
 
 
 void ikj(const double *A, const double *B, double *C, const int n) 
 {
-
+    int i, j, k;
+    for (i=0; i<n; i++) { 
+        for (k=0; k<n; k++) { 
+            register double R = A[i * n + k]; 
+            for (j=0; j<n; j++) { //Iterator for A's Columns & B's Columns
+                C[i * n + j] += R * B[k * n + j];
+            }
+        }
+    }
 }
 
 void bikj(const double *A, const double *B, double *C, const int n, const int b) 
 {
-
+    int i, j, k, i1, j1, k1;
+    for (i=0; i<n; i+=b) { 
+        for (k=0; k<n; k+=b) { 
+            for (j=0; j<n; j+=b) { 
+                /* B x B mini matrix multiplications */
+                for (i1=i; i1<i+b; i1++) { 
+                    for (j1=j; j1<j+b; j1++) { 
+                        register double sum = C[i1 * n + j1];
+                        for (k1=k; k1<k+b; k1++) {
+                            sum += A[i1 * n + k1] * B[k1 * n + j1];
+                        }
+                        C[i1 * n + j1] = sum;
+                    }
+                }
+            }
+        }
+    }
 }
 
 void jki(const double *A, const double *B, double *C, const int n) 
 {
-
+    int i, j, k;
+    for (j=0; j<n; j++) { 
+        for (k=0; k<n; k++) { 
+            register double R = B[k * n + j];
+            for (i=0; i<n; i++) { //Iterator for A's Rows & B's Rows
+                C[i * n + j] += A[i * n + k] * R;
+            }
+        }
+    }
 }
 
 void bjki(const double *A, const double *B, double *C, const int n, const int b) 
 {
-
+    int i, j, k, i1, j1, k1;
+    for (j=0; j<n; j+=b) { 
+        for (k=0; k<n; k+=b) { 
+            for (i=0; i<n; i+=b) { 
+                /* B x B mini matrix multiplications */
+                for (i1=i; i1<i+b; i1++) { 
+                    for (j1=j; j1<j+b; j1++) { 
+                        register double sum = C[i1 * n + j1];
+                        for (k1=k; k1<k+b; k1++) {
+                            sum += A[i1 * n + k1] * B[k1 * n + j1];
+                        }
+                        C[i1 * n + j1] = sum;
+                    }
+                }
+            }
+        }
+    }
 }
 
 void kji(const double *A, const double *B, double *C, const int n) 
 {
-
+    int i, j, k;
+    for (k=0; k<n; k++) { 
+        for (j=0; j<n; j++) { 
+            register double R = B[k * n + j];
+            for (i=0; i<n; i++) { //Iterator for A's Rows & B's Rows
+                C[i * n + j] += A[i * n + k] * R;
+            }
+        }
+    }
 }
 
 void bkji(const double *A, const double *B, double *C, const int n, const int b) 
 {
-
+    int i, j, k, i1, j1, k1;
+    for (k=0; k<n; k+=b) { 
+        for (j=0; j<n; j+=b) { 
+            for (i=0; i<n; i+=b) { 
+                /* B x B mini matrix multiplications */
+                for (i1=i; i1<i+b; i1++) { 
+                    for (j1=j; j1<j+b; j1++) { 
+                        register double sum = C[i1 * n + j1];
+                        for (k1=k; k1<k+b; k1++) {
+                            sum += A[i1 * n + k1] * B[k1 * n + j1];
+                        }
+                        C[i1 * n + j1] = sum;
+                    }
+                }
+            }
+        }
+    }
 }
 //Cache Reuse part 3 End 
 
