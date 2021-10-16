@@ -356,5 +356,41 @@ void bkji(const double *A, const double *B, double *C, const int n, const int b)
 //Cache Reuse part 4
 void optimal(const double* A, const double* B, double *C, const int n, const int b)
 {
-    
+    int i, j, k, i1, j1, k1;
+    for (k=0; k<n; k+=b) { 
+        for (i=0; i<n; i+=b) { 
+            for (j=0; j<n; j+=b) { 
+                /* B x B mini matrix multiplications */
+                for (i1=i; i1<i+b; i1+=2) { 
+                    for (j1=j; j1<j+b; j1+=2) { 
+                        register double C00 = C[i1 * n + j1]; //2 X 2 Block Matrix
+                        register double C01 = C[i1 * n + j1 + 1];
+                        register double C10 = C[i1 * n + j1 + n];
+                        register double C11 = C[i1 * n + j1 + n + 1];
+                        for (k1=k; k1<k+b; k1+=2) {
+                            register double A00 = A[i1 * n + k1];
+                            register double A10 = A[i1 * n + k1 + n]; 
+                            register double B00 = B[k1 * n + j1];
+                            register double B01 = B[k1 * n + j1 + 1];
+
+                            C00 += A00 * B00; C01 += A00 * B01;
+                            C10 += A10 * B00; C11 += A10 * B01;
+
+                            A00 = A[i1 * n + k1 + 1];     //A01
+                            A10 = A[i1 * n + k1 + n + 1]; //A11
+                            B00 = B[k1 * n + j1 + n];     //B10
+                            B01 = B[k1 * n + j1 + 1 + n]; //B11
+
+                            C00 += A00 * B00; C01 += A00 * B01;
+                            C10 += A10 * B00; C11 += A10 * B01;
+                        }
+                        C[i1 * n + j1] = C00;
+                        C[i1 * n + j1 + 1] = C01;
+                        C[i1 * n + j1 + n] = C10;
+                        C[i1 * n + j1 + n + 1] = C11;
+                    }
+                }
+            }
+        }
+    }
 }
