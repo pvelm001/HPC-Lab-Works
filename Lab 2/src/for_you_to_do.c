@@ -105,7 +105,7 @@ void mydtrsv(char UPLO, double *A, double *B, int n, int *ipiv)
         xy[i] = 0;
     }
 
-    if (UPLO == 'U') {                         //Forward Substitution
+    if (UPLO == 'L') {                         //Forward Substitution
         xy[0] = B[ipiv[0]];
         for (i=1; i<n; i++) {
             double sum = 0;
@@ -116,7 +116,7 @@ void mydtrsv(char UPLO, double *A, double *B, int n, int *ipiv)
         }
     }
 
-    else if (UPLO = 'L') {                      //Backward Substitution
+    else if (UPLO = 'U') {                      //Backward Substitution
         xy[n - 1] = B[n - 1] / A[(n * n) - 1];
         for (i=n-2; i>-1; i--) {
             double sum = 0;
