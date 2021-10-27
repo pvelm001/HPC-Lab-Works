@@ -101,9 +101,6 @@ void mydtrsv(char UPLO, double *A, double *B, int n, int *ipiv)
 {
     int i, k;
     double xy[n];
-    for (i=0; i<n; i++) {
-        xy[i] = 0;
-    }
 
     if (UPLO == 'L') {                         //Forward Substitution
         xy[0] = B[ipiv[0]];
