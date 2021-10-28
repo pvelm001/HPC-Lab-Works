@@ -273,10 +273,10 @@ int mydgetrf_block(double *A, int *ipiv, int n, int b)
 
        //Backward Substitution - Register Reuse
         for (ir=ib; ir<end; ir++) { //ir - Row Iterator (L) - block start to block end
+            int irr = ir * n; //irr - ir's Row
             for (ic=end; ic<n; ic++) { //ic - Col Iterator (U) - block end to end
-                int irr = ir * n; //irr - ir's Row
                 double sum = 0;
-                for (ik=0; ik<ir; ik++) { //ik - Dual Iterator (L, U) - block start to diagnol & block start to block end
+                for (ik=ib; ik<ir; ik++) { //ik - Dual Iterator (L, U) - block start to diagnol & block start to block end
                     sum += A[irr + ik] * A[ik * n + ic];
                 }
                 A[irr + ic] -= sum;
@@ -288,7 +288,7 @@ int mydgetrf_block(double *A, int *ipiv, int n, int b)
             for (ic=end; ic<n; ic++) { //ic - Col Iterator - block end to end
                 int irr = ir * n; //irr - ir's Row
                 double sum = 0;
-                for (ik=ib; ik<ib+b; ik++) { //ik - Dual Iterator - block start to block end
+                for (ik=ib; ik<end; ik++) { //ik - Dual Iterator - block start to block end
                     sum += A[irr + ik] * A[ik * n + ic];
                 }
                 A[irr + ic] -= sum;
