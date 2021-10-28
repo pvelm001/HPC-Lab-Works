@@ -207,6 +207,80 @@ void mydgemm(double *A, double *B, double *C, int n, int i, int j, int k, int b)
  **/
 int mydgetrf_block(double *A, int *ipiv, int n, int b) 
 {
+    int ib, idg, ir, ic, ik;
+    for (ib=0; ib<n; ib+=b) { //ib - Block Iterator - 0 to n
+        int end = ib + b;
+        
+        //BLAS-2 GEPP
+        for (idg=ib; idg<end; idg++) { //idg - Diagnol Iterator - block start to block end
+
+            int maxIndex = idg; 
+            double maxElement = fabs(A[idg * n + idg]);
+
+            //Find Maximum Row
+            for (ir=idg+1; ir<n; ir++) { //ir - Row Iterator - below diagnol to end
+                if (fabs(A[ir * n + idg]) > maxElement) { 
+                    maxIndex = ir;
+                    maxElement = fabs(A[ir * n + idg]);
+                }
+            }
+
+            if (maxElement == 0) //Singluar Matrix Check
+                return -1;
+            
+            else {
+
+                //Partial Pivoting
+                if (maxIndex != idg) {
+                    
+                    //Store Pivot Information
+                    int temps = ipiv[idg]; 
+                    ipiv[idg] = ipiv[maxIndex];
+                    ipiv[maxIndex] = temps;
+
+                    //Swap Rows - Register Reuse
+                    double tempv = 0; 
+                    for(ic=0; ic<n; ic++) { //ic - Column Iterator - start to end
+                        tempv = A[idg * n + ic];
+                        A[idg * n + ic] = A[maxIndex * n + ic];
+                        A[maxIndex * n + ic] = tempv;
+                    }
+
+                }
+            }
+
+            //BLAS-2 Factorization
+            for (ir=idg+1; ir<n; ir++) { //ir - Row Iterator - below diagnol to ends
+                A[ir * n + idg] = A[ir * n + idg] / A[idg * n + idg]; 
+                for (ik=idg+1; ik<end; ik++) { //ik - Col Iterator - diagnol row start to diagnol column end
+                    A[ir * n + ik] -= A[ir * n + idg] * A[idg * n + ik];
+                }
+            }
+        } 
+
+       //Backward Substitution - Register Reuse
+        for (ir=ib; ir<end; ir++) { //ir - Row Iterator (L) - block start to block end
+            for (ic=end; ic<n; ic++) { //ic - Col Iterator (U) - block end to end
+                double sum = 0;
+                for (ik=0; ik<ir; ik++) { //ik - Dual Iterator (L, U) - block start to diagnol & block start to block end
+                    sum += A[ir * n + ik] * A[ik * n + ic];
+                }
+                A[ir * n + ic] -= sum;
+            }
+        }
+
+        //BLAS-3 Factorization - Register Reuse
+        for (ir=end; ir<n; ir++) { //ir - Row Iterator - block end to end
+            for (ic=end; ic<n; ic++) { //ic - Col Iterator - block end to end
+                double sum = 0;
+                for (ik=ib; ik<ib+b; ik++) { //ik - Dual Iterator - block start to block end
+                    sum += A[ir * n + ik] * A[ik * n + ic];
+                }
+                A[ir * n + ic] -= sum;
+            }
+        }
+    }
+
     return 0;
 }
 
