@@ -24,45 +24,55 @@ int get_block_size(){
  *      return  0 : return normally 
  * 
  **/
-
-
 int mydgetrf(double *A, int *ipiv, int n) 
 {
-    int i, t, j, k, iter;
-    for (i=0; i<n; i++) { //Performing LU Factorization
-        
-        int maxIndex = i;
-        double maxElement = fabs(A[i * n + i]);
+     int idg, ir, ic, ik;
+ 
+    //BLAS-2 GEPP
+    for (idg=0; idg<n; idg++) { //idg - Diagnol Iterator - start to end
 
-        for (t=i+1; t<n; t++) { //Finding maximum element 
-            if (fabs(A[t * n + i]) > maxElement) {
-                maxIndex = t;
-                maxElement = fabs(A[t * n + i]);
+        int maxIndex = idg;
+        int idgr = idg * n; //idgr - idg's Row
+        double maxElement = fabs(A[idgr + idg]);
+
+        //Find Maximum Row
+        for (ir=idg+1; ir<n; ir++) { //ir - Row Iterator - below diagnol to end
+            int irr = ir * n; //irr - ir's Row
+            if (fabs(A[irr + idg]) > maxElement) {
+                maxIndex = ir;
+                maxElement = fabs(A[irr + idg]);
             }
         }
 
-        if (maxElement == 0) {
+        if (maxElement == 0)  //Singluar Matrix Check
             return -1;
-        }
+        
         else {
-            if (maxIndex != i) {
-                int temps = ipiv[i]; //Saving Pivoting Information
-                ipiv[i] = ipiv[maxIndex];
+
+            //Partial Pivoting
+            if (maxIndex != idg) {
+
+                //Store Pivot Information
+                int temps = ipiv[idg]; //Saving Pivoting Information
+                ipiv[idg] = ipiv[maxIndex];
                 ipiv[maxIndex] = temps;
 
-                double tempv[n]; //Swapping the rows
-                for(iter=0; iter<n; iter++) {
-                    tempv[iter] = A[i * n + iter];
-                    A[i * n + iter] = A[maxIndex * n + iter];
-                    A[maxIndex * n + iter] = tempv[iter];
+                //Swap Rows
+                double tempv; 
+                for(ic=0; ic<n; ic++) { //ic - Column Iterator - start to end
+                    tempv = A[idgr + ic];
+                    A[idgr + ic] = A[maxIndex * n + ic];
+                    A[maxIndex * n + ic] = tempv;
                 }
             }
         }
 
-        for (j=i+1; j<n; j++) { //Performing Factorization
-            A[j * n + i] = A[j * n + i] / A[i * n + i]; 
-            for (k=i+1; k<n; k++) {
-                A[j * n + k] = A[j * n + k] - A[j * n + i] * A[i * n + k];
+        //BLAS-2 Factorization
+        for (ir=idg+1; ir<n; ir++) { //ir - Row Iterator - below diagnol to ends
+            int irr = ir * n; //irr - ir's Row
+            A[irr + idg] = A[irr + idg] / A[idgr + idg]; 
+            for (ik=idg+1; ik<n; ik++) { //ik - Dual Iterator - start to end
+                A[irr + ik] -= A[irr + idg] * A[idgr + ik];
             }
         }
     }
@@ -99,34 +109,34 @@ int mydgetrf(double *A, int *ipiv, int n)
  **/
 void mydtrsv(char UPLO, double *A, double *B, int n, int *ipiv)
 {
-    int i, k;
+    int ir, ik;
     double xy[n];
-
-    if (UPLO == 'L') {                         //Forward Substitution
+    
+    //Forward Substitution
+    if (UPLO == 'L') {                         
         xy[0] = B[ipiv[0]];
-        for (i=1; i<n; i++) {
+        for (ir=1; ir<n; ir++) { //ir - Row Iterator - start to end
+            int irr = ir * n; //irr - ir's Row
             double sum = 0;
-            for (k=0; k<i; k++) {
-                sum += xy[k] * A[i * n + k];
-            }
-            xy[i] = B[ipiv[i]] - sum;
+            for (ik=0; ik<ir; ik++) //ik - Dual Iterator
+                sum += xy[ik] * A[irr + ik];
+            xy[ir] = B[ipiv[ir]] - sum;
         }
     }
 
-    else if (UPLO = 'U') {                      //Backward Substitution
+    //Backward Substitution
+    else if (UPLO == 'U') {                      
         xy[n - 1] = B[n - 1] / A[(n * n) - 1];
-        for (i=n-2; i>-1; i--) {
+        for (ir=n-2; ir>-1; ir--) { //ir - Row Iterator - end to start
+            int irr = ir * n; //irr - ir's Row
             double sum = 0;
-            for (k=i+1; k<n; k++) {
-                sum += xy[k] * A[i * n + k];
-            }
-            xy[i] = (B[i] - sum) / A[i * n + i];
+            for (ik=ir+1; ik<n; ik++) //ik - Dual Iterator
+                sum += xy[ik] * A[irr + ik];
+            xy[ir] = (B[ir] - sum) / A[irr + ir];
         }
     }
 
-    for (i=0; i<n; i++) 
-        B[i] = xy[i];
-
+    for (ir=0; ir<n; ir++) { B[ir] = xy[ir]; }
     return;
 }
 
@@ -215,13 +225,15 @@ int mydgetrf_block(double *A, int *ipiv, int n, int b)
         for (idg=ib; idg<end; idg++) { //idg - Diagnol Iterator - block start to block end
 
             int maxIndex = idg; 
-            double maxElement = fabs(A[idg * n + idg]);
+            int idgr = idg * n; //idgr - idg's Row
+            double maxElement = fabs(A[idgr + idg]);
 
             //Find Maximum Row
             for (ir=idg+1; ir<n; ir++) { //ir - Row Iterator - below diagnol to end
-                if (fabs(A[ir * n + idg]) > maxElement) { 
+                int irr = ir * n; //irr - ir's Row
+                if (fabs(A[irr + idg]) > maxElement) { 
                     maxIndex = ir;
-                    maxElement = fabs(A[ir * n + idg]);
+                    maxElement = fabs(A[irr + idg]);
                 }
             }
 
@@ -241,8 +253,8 @@ int mydgetrf_block(double *A, int *ipiv, int n, int b)
                     //Swap Rows - Register Reuse
                     double tempv = 0; 
                     for(ic=0; ic<n; ic++) { //ic - Column Iterator - start to end
-                        tempv = A[idg * n + ic];
-                        A[idg * n + ic] = A[maxIndex * n + ic];
+                        tempv = A[idgr + ic];
+                        A[idgr + ic] = A[maxIndex * n + ic];
                         A[maxIndex * n + ic] = tempv;
                     }
 
@@ -251,9 +263,10 @@ int mydgetrf_block(double *A, int *ipiv, int n, int b)
 
             //BLAS-2 Factorization
             for (ir=idg+1; ir<n; ir++) { //ir - Row Iterator - below diagnol to ends
-                A[ir * n + idg] = A[ir * n + idg] / A[idg * n + idg]; 
+                int irr = ir * n; //irr - ir's Row
+                A[irr + idg] = A[irr + idg] / A[idgr + idg]; 
                 for (ik=idg+1; ik<end; ik++) { //ik - Col Iterator - diagnol row start to diagnol column end
-                    A[ir * n + ik] -= A[ir * n + idg] * A[idg * n + ik];
+                    A[irr + ik] -= A[irr + idg] * A[idgr + ik];
                 }
             }
         } 
@@ -261,26 +274,27 @@ int mydgetrf_block(double *A, int *ipiv, int n, int b)
        //Backward Substitution - Register Reuse
         for (ir=ib; ir<end; ir++) { //ir - Row Iterator (L) - block start to block end
             for (ic=end; ic<n; ic++) { //ic - Col Iterator (U) - block end to end
+                int irr = ir * n; //irr - ir's Row
                 double sum = 0;
                 for (ik=0; ik<ir; ik++) { //ik - Dual Iterator (L, U) - block start to diagnol & block start to block end
-                    sum += A[ir * n + ik] * A[ik * n + ic];
+                    sum += A[irr + ik] * A[ik * n + ic];
                 }
-                A[ir * n + ic] -= sum;
+                A[irr + ic] -= sum;
             }
         }
 
         //BLAS-3 Factorization - Register Reuse
         for (ir=end; ir<n; ir++) { //ir - Row Iterator - block end to end
             for (ic=end; ic<n; ic++) { //ic - Col Iterator - block end to end
+                int irr = ir * n; //irr - ir's Row
                 double sum = 0;
                 for (ik=ib; ik<ib+b; ik++) { //ik - Dual Iterator - block start to block end
-                    sum += A[ir * n + ik] * A[ik * n + ic];
+                    sum += A[irr + ik] * A[ik * n + ic];
                 }
-                A[ir * n + ic] -= sum;
+                A[irr + ic] -= sum;
             }
         }
     }
 
     return 0;
 }
-
