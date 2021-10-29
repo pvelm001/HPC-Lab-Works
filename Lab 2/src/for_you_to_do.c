@@ -145,45 +145,51 @@ void mydtrsv(char UPLO, double *A, double *B, int n, int *ipiv)
  * Same function as what you used in lab1, cache_part4.c : optimal( ... ).
  * 
  **/
-void mydgemm(double *A, double *B, double *C, int n, int i, int j, int k, int b)
+void mydgemm(double *A, int n, int ib, int end, int b)
 {
-    int i1, j1, k1;
-    for (k=0; k<n; k+=b) { 
-        for (i=0; i<n; i+=b) { 
-            for (j=0; j<n; j+=b) { 
-                /* B x B mini matrix multiplications */
-                for (i1=i; i1<i+b; i1+=2) { 
-                    for (j1=j; j1<j+b; j1+=2) { 
-                        register double C00 = C[i1 * n + j1]; //2 X 2 Block Matrix
-                        register double C01 = C[i1 * n + j1 + 1];
-                        register double C10 = C[i1 * n + j1 + n];
-                        register double C11 = C[i1 * n + j1 + n + 1];
-                        for (k1=k; k1<k+b; k1+=2) {
-                            register double A00 = A[i1 * n + k1];
-                            register double A10 = A[i1 * n + k1 + n]; 
-                            register double B00 = B[k1 * n + j1];
-                            register double B01 = B[k1 * n + j1 + 1];
+    int ir, ic, ik, ibr, ibc, ibk;
 
-                            C00 += A00 * B00; C01 += A00 * B01;
-                            C10 += A10 * B00; C11 += A10 * B01;
+    //BLAS-3 Factorization - Register Reuse with Cache Blocking
+    for (ik=ib; ik<end; ik+=b) { //ik - Dual Iterator - Lower Column and Upper Row Iterator
+        for (ir=end; ir<n; ir+=b) {  //ir - Row Iterator - Main and Lower Rectangular Matrix
+            for (ic=end; ic<n; ic+=b) { //ic - Column Iterator - Main and Upper Rectangular Matrix 
+                
+                //2 X 2 Block Matrix
+                for (ibr=ir; ibr<ir+b; ibr+=2) { //ibr - 
+                    int ibrr = ibr * n; //ibrr - ibr's Row 
+                    for (ibc=ic; ibc<ic+b; ibc+=2) { 
+                        register double C00 = A[ibrr + ibc];            
+                        register double C01 = A[ibrr + ibc + 1];
+                        register double C10 = A[ibrr + ibc + n];
+                        register double C11 = A[ibrr + ibc + n + 1];
+                        for (ibk=ik; ibk<ik+b; ibk+=2) {
+                            int ibkr = ibk * n; //ibkr - ibk's Row 
+                            register double A00 = A[ibrr + ibk];
+                            register double A10 = A[ibrr + ibk + n]; 
+                            register double B00 = A[ibkr + ibc];
+                            register double B01 = A[ibkr + ibc + 1];
 
-                            A00 = A[i1 * n + k1 + 1];     //A01
-                            A10 = A[i1 * n + k1 + n + 1]; //A11
-                            B00 = B[k1 * n + j1 + n];     //B10
-                            B01 = B[k1 * n + j1 + 1 + n]; //B11
+                            C00 -= A00 * B00; C01 -= A00 * B01;
+                            C10 -= A10 * B00; C11 -= A10 * B01;
 
-                            C00 += A00 * B00; C01 += A00 * B01;
-                            C10 += A10 * B00; C11 += A10 * B01;
+                            A00 = A[ibrr + ibk + 1];     //A01
+                            A10 = A[ibrr + ibk + n + 1]; //A11
+                            B00 = A[ibkr + ibc + n];     //B10
+                            B01 = A[ibkr + ibc + 1 + n]; //B11
+
+                            C00 -= A00 * B00; C01 -= A00 * B01;
+                            C10 -= A10 * B00; C11 -= A10 * B01;
                         }
-                        C[i1 * n + j1] = C00;
-                        C[i1 * n + j1 + 1] = C01;
-                        C[i1 * n + j1 + n] = C10;
-                        C[i1 * n + j1 + n + 1] = C11;
+                        A[ibrr + ibc] = C00;
+                        A[ibrr + ibc + 1] = C01;
+                        A[ibrr + ibc + n] = C10;
+                        A[ibrr + ibc + n + 1] = C11;
                     }
                 }
             }
         }
     }
+    
     return;
 }
 
@@ -284,16 +290,7 @@ int mydgetrf_block(double *A, int *ipiv, int n, int b)
         }
 
         //BLAS-3 Factorization - Register Reuse
-        for (ir=end; ir<n; ir++) { //ir - Row Iterator - block end to end
-            for (ic=end; ic<n; ic++) { //ic - Col Iterator - block end to end
-                int irr = ir * n; //irr - ir's Row
-                double sum = 0;
-                for (ik=ib; ik<end; ik++) { //ik - Dual Iterator - block start to block end
-                    sum += A[irr + ik] * A[ik * n + ic];
-                }
-                A[irr + ic] -= sum;
-            }
-        }
+        mydgemm(A, n, ib, end, b);
     }
 
     return 0;
