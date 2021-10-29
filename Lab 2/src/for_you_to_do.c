@@ -3,7 +3,7 @@
 int get_block_size(){
     //return the block size you'd like to use 
     /*add your code here */
-    return 32;
+    return 36;
   
 }
 
@@ -147,49 +147,79 @@ void mydtrsv(char UPLO, double *A, double *B, int n, int *ipiv)
  **/
 void mydgemm(double *A, int n, int ib, int end, int b)
 {
-    int ir, ic, ik, ibr, ibc, ibk;
+        int ir, ic, ik, ibr, ibc, ibk;
 
     //BLAS-3 Factorization - Register Reuse with Cache Blocking
     for (ik=ib; ik<end; ik+=b) { //ik - Dual Iterator - Lower Column and Upper Row Iterator
         for (ir=end; ir<n; ir+=b) {  //ir - Row Iterator - Main and Lower Rectangular Matrix
             for (ic=end; ic<n; ic+=b) { //ic - Column Iterator - Main and Upper Rectangular Matrix 
                 
-                //2 X 2 Block Matrix
-                for (ibr=ir; ibr<ir+b; ibr+=2) { //ibr - 
+                //3 X 3 Register Block Matrix
+                for (ibr=ir; ibr<ir+b; ibr+=3) { //ibr - 
                     int ibrr = ibr * n; //ibrr - ibr's Row 
-                    for (ibc=ic; ibc<ic+b; ibc+=2) { 
+                    for (ibc=ic; ibc<ic+b; ibc+=3) { 
                         register double C00 = A[ibrr + ibc];            
                         register double C01 = A[ibrr + ibc + 1];
+                        register double C02 = A[ibrr + ibc + 2];
                         register double C10 = A[ibrr + ibc + n];
                         register double C11 = A[ibrr + ibc + n + 1];
-                        for (ibk=ik; ibk<ik+b; ibk+=2) {
+                        register double C12 = A[ibrr + ibc + n + 2];
+                        register double C20 = A[ibrr + ibc + 2 * n];
+                        register double C21 = A[ibrr + ibc + 2 * n + 1];
+                        register double C22 = A[ibrr + ibc + 2 * n + 2];
+
+                        for (ibk=ik; ibk<ik+b; ibk+=3) {
                             int ibkr = ibk * n; //ibkr - ibk's Row 
                             register double A00 = A[ibrr + ibk];
                             register double A10 = A[ibrr + ibk + n]; 
+                            register double A20 = A[ibrr + ibk + 2 * n];
                             register double B00 = A[ibkr + ibc];
                             register double B01 = A[ibkr + ibc + 1];
+                            register double B02 = A[ibkr + ibc + 2];
 
-                            C00 -= A00 * B00; C01 -= A00 * B01;
-                            C10 -= A10 * B00; C11 -= A10 * B01;
+                            C00 -= A00 * B00; C01 -= A00 * B01; C02 -= A00 * B02;
+                            C10 -= A10 * B00; C11 -= A10 * B01; C12 -= A10 * B02;
+                            C20 -= A20 * B00; C21 -= A20 * B01; C22 -= A20 * B02;
 
-                            A00 = A[ibrr + ibk + 1];     //A01
-                            A10 = A[ibrr + ibk + n + 1]; //A11
-                            B00 = A[ibkr + ibc + n];     //B10
-                            B01 = A[ibkr + ibc + 1 + n]; //B11
+                            A00 = A[ibrr + ibk + 1];             //A01
+                            A10 = A[ibrr + ibk + n + 1];         //A11
+                            A20 = A[ibrr + ibk + 2 * n + 1];     //A21
+                            B00 = A[ibkr + ibc + n];             //B10
+                            B01 = A[ibkr + ibc + n + 1];         //B11
+                            B02 = A[ibkr + ibc + n + 2];         //B12
 
-                            C00 -= A00 * B00; C01 -= A00 * B01;
-                            C10 -= A10 * B00; C11 -= A10 * B01;
+
+                            C00 -= A00 * B00; C01 -= A00 * B01; C02 -= A00 * B02;
+                            C10 -= A10 * B00; C11 -= A10 * B01; C12 -= A10 * B02;
+                            C20 -= A20 * B00; C21 -= A20 * B01; C22 -= A20 * B02;
+
+                            A00 = A[ibrr + ibk + 2];               //A02
+                            A10 = A[ibrr + ibk + n + 2];           //A12
+                            A20 = A[ibrr + ibk + 2 * n + 2];       //A22
+                            B00 = A[ibkr + ibc + 2 * n];           //B20
+                            B01 = A[ibkr + ibc + 2 * n + 1];       //B21
+                            B02 = A[ibkr + ibc + 2 * n + 2];       //B22
+
+                            C00 -= A00 * B00; C01 -= A00 * B01; C02 -= A00 * B02;
+                            C10 -= A10 * B00; C11 -= A10 * B01; C12 -= A10 * B02;
+                            C20 -= A20 * B00; C21 -= A20 * B01; C22 -= A20 * B02;
+
+
                         }
                         A[ibrr + ibc] = C00;
                         A[ibrr + ibc + 1] = C01;
+                        A[ibrr + ibc + 2] = C02;
                         A[ibrr + ibc + n] = C10;
                         A[ibrr + ibc + n + 1] = C11;
+                        A[ibrr + ibc + n + 2] = C12;
+                        A[ibrr + ibc + 2 * n] = C20;
+                        A[ibrr + ibc + 2 * n + 1] = C21;
+                        A[ibrr + ibc + 2 * n + 2] = C22;
                     }
                 }
             }
         }
-    }
-    
+    }    
     return;
 }
 
