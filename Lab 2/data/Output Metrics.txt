@@ -1,0 +1,211 @@
+#Naive Implementition - basic ijk matrix multiplication - 128
+[pvelm001@tardis data]$ cat mydata.txt
+ n = 1024
+Elapsed time, MKL LAPACK: 0.126224 seconds
+Elapsed time, naive LU: 3.119489 seconds
+Elapsed time, block LU: 3.122401 seconds
+ n = 2048
+Elapsed time, MKL LAPACK: 0.656966 seconds
+Elapsed time, naive LU: 25.692413 seconds
+Elapsed time, block LU: 30.791274 seconds
+ n = 3072
+Elapsed time, MKL LAPACK: 1.829252 seconds
+Elapsed time, naive LU: 86.188865 seconds
+Elapsed time, block LU: 85.629538 seconds
+ n = 4096
+Elapsed time, MKL LAPACK: 4.607052 seconds
+Elapsed time, naive LU: 208.166218 seconds
+Elapsed time, block LU: 343.448010 seconds
+ n = 5120
+Elapsed time, MKL LAPACK: 7.319249 seconds
+Elapsed time, naive LU: 397.409431 seconds
+Elapsed time, block LU: 402.051203 seconds
+[pvelm001@tardis data]$
+
+Optimized Version - 2X2 Register Blocks and Cache Blocking - 32
+[pvelm001@tardis data]$ cat mydata.txt
+ n = 1024
+Elapsed time, MKL LAPACK: 0.126951 seconds
+Elapsed time, naive LU: 3.121698 seconds
+Elapsed time, block LU: 1.685136 seconds
+ n = 2016
+Elapsed time, MKL LAPACK: 0.550708 seconds
+Elapsed time, naive LU: 24.328724 seconds
+Elapsed time, block LU: 11.326772 seconds
+ n = 3008
+Elapsed time, MKL LAPACK: 1.637382 seconds
+Elapsed time, naive LU: 80.577416 seconds
+Elapsed time, block LU: 38.466289 seconds
+ n = 4000
+Elapsed time, MKL LAPACK: 3.515722 seconds
+Elapsed time, naive LU: 190.177121 seconds
+Elapsed time, block LU: 85.384174 seconds
+ n = 5024
+Elapsed time, MKL LAPACK: 6.750070 seconds
+Elapsed time, naive LU: 375.522166 seconds
+Elapsed time, block LU: 168.296274 seconds
+[pvelm001@tardis data]$
+
+
+Optimized Version - 2X2 Register Blocks and Cache Blocking - 64
+[pvelm001@tardis data]$ cat mydata.txt
+ n = 1024
+Elapsed time, MKL LAPACK: 0.129967 seconds
+Elapsed time, naive LU: 3.114827 seconds
+Elapsed time, block LU: 1.860467 seconds
+ n = 2048
+Elapsed time, MKL LAPACK: 0.648891 seconds
+Elapsed time, naive LU: 25.748188 seconds
+Elapsed time, block LU: 13.194113 seconds
+ n = 3008
+Elapsed time, MKL LAPACK: 1.624398 seconds
+Elapsed time, naive LU: 80.241692 seconds
+Elapsed time, block LU: 40.377594 seconds
+ n = 4032
+Elapsed time, MKL LAPACK: 3.572716 seconds
+Elapsed time, naive LU: 193.267539 seconds
+Elapsed time, block LU: 97.259966 seconds
+ n = 5056
+Elapsed time, MKL LAPACK: 6.849655 seconds
+Elapsed time, naive LU: 380.742319 seconds
+Elapsed time, block LU: 188.523645 seconds
+[pvelm001@tardis data]$
+
+Optimized Version - 2X2 Register Blocks and Cache Blocking - 128
+[pvelm001@tardis data]$ cat mydata.txt
+ n = 1024
+Elapsed time, MKL LAPACK: 0.134877 seconds
+Elapsed time, naive LU: 3.162623 seconds
+Elapsed time, block LU: 1.927063 seconds
+ n = 2048
+Elapsed time, MKL LAPACK: 0.673557 seconds
+Elapsed time, naive LU: 25.791115 seconds
+Elapsed time, block LU: 15.626321 seconds
+ n = 3072
+Elapsed time, MKL LAPACK: 1.883460 seconds
+Elapsed time, naive LU: 86.225333 seconds
+Elapsed time, block LU: 44.346229 seconds
+ n = 4096
+Elapsed time, MKL LAPACK: 4.614904 seconds
+Elapsed time, naive LU: 207.982684 seconds
+Elapsed time, block LU: 153.416682 seconds
+ n = 5120
+Elapsed time, MKL LAPACK: 7.333047 seconds
+Elapsed time, naive LU: 397.391769 seconds
+Elapsed time, block LU: 198.102937 seconds
+
+Optimized Version - 2X2 Register Blocks and Cache Blocking - 256
+[pvelm001@tardis data]$ cat mydata.txt
+ n = 1024
+Elapsed time, MKL LAPACK: 0.125429 seconds
+Elapsed time, naive LU: 3.127513 seconds
+Elapsed time, block LU: 2.562972 seconds
+ n = 2048
+Elapsed time, MKL LAPACK: 0.653376 seconds
+Elapsed time, naive LU: 25.774511 seconds
+Elapsed time, block LU: 20.753921 seconds
+ n = 3072
+Elapsed time, MKL LAPACK: 1.831659 seconds
+Elapsed time, naive LU: 86.265516 seconds
+Elapsed time, block LU: 50.783136 seconds
+ n = 4096
+Elapsed time, MKL LAPACK: 4.626858 seconds
+Elapsed time, naive LU: 208.355631 seconds
+Elapsed time, block LU: 191.509759 seconds
+ n = 5120
+Elapsed time, MKL LAPACK: 7.345565 seconds
+Elapsed time, naive LU: 398.516823 seconds
+Elapsed time, block LU: 223.696173 seconds
+[pvelm001@tardis data]$
+
+Optimized Version - 3X3 Register Blocks and Cache Blocking - 36
+[pvelm001@tardis data]$ cat mydata.txt
+ n = 1008
+Elapsed time, MKL LAPACK: 0.134276 seconds
+Elapsed time, naive LU: 3.009054 seconds
+Elapsed time, block LU: 1.164378 seconds
+ n = 2016
+Elapsed time, MKL LAPACK: 0.552387 seconds
+Elapsed time, naive LU: 24.329650 seconds
+Elapsed time, block LU: 8.502955 seconds
+ n = 3024
+Elapsed time, MKL LAPACK: 1.676477 seconds
+Elapsed time, naive LU: 82.278299 seconds
+Elapsed time, block LU: 27.629596 seconds
+ n = 4032
+Elapsed time, MKL LAPACK: 3.579157 seconds
+Elapsed time, naive LU: 194.397879 seconds
+Elapsed time, block LU: 69.183691 seconds
+ n = 5004
+Elapsed time, MKL LAPACK: 6.755068 seconds
+Elapsed time, naive LU: 377.821549 seconds
+Elapsed time, block LU: 122.214738 seconds
+
+Optimized Version - 3X3 Register Blocks and Cache Blocking - 24
+[pvelm001@tardis data]$ cat mydata.txt
+ n = 1008
+Elapsed time, MKL LAPACK: 0.114627 seconds
+Elapsed time, naive LU: 3.054396 seconds
+Elapsed time, block LU: 1.076261 seconds
+ n = 2016
+Elapsed time, MKL LAPACK: 0.550143 seconds
+Elapsed time, naive LU: 24.789661 seconds
+Elapsed time, block LU: 8.215627 seconds
+ n = 3000
+Elapsed time, MKL LAPACK: 1.646168 seconds
+Elapsed time, naive LU: 79.167313 seconds
+Elapsed time, block LU: 26.704845 seconds
+ n = 4008
+Elapsed time, MKL LAPACK: 3.534454 seconds
+Elapsed time, naive LU: 202.580326 seconds
+Elapsed time, block LU: 62.816437 seconds
+ n = 5016
+Elapsed time, MKL LAPACK: 6.741916 seconds
+Elapsed time, naive LU: 368.744622 seconds
+Elapsed time, block LU: 123.844980 seconds
+
+Optimized Version - 3X3 Register Blocks and Cache Blocking - 12
+[pvelm001@tardis data]$ cat mydata.txt
+ n = 1008
+Elapsed time, MKL LAPACK: 0.123378 seconds
+Elapsed time, naive LU: 3.067257 seconds
+Elapsed time, block LU: 1.074436 seconds
+ n = 2016
+Elapsed time, MKL LAPACK: 0.550215 seconds
+Elapsed time, naive LU: 24.549333 seconds
+Elapsed time, block LU: 8.235222 seconds
+ n = 3000
+Elapsed time, MKL LAPACK: 1.632690 seconds
+Elapsed time, naive LU: 81.114989 seconds
+Elapsed time, block LU: 26.446030 seconds
+ n = 4008
+Elapsed time, MKL LAPACK: 3.518160 seconds
+Elapsed time, naive LU: 190.793073 seconds
+Elapsed time, block LU: 62.409624 seconds
+ n = 5016
+Elapsed time, MKL LAPACK: 6.726937 seconds
+Elapsed time, naive LU: 373.095872 seconds
+Elapsed time, block LU: 123.032310 seconds
+
+
+Matrix KIJ Version with register resue and Cache Blocking - 12
+ n = 1008
+Elapsed time, MKL LAPACK: 0.118052 seconds
+Elapsed time, naive LU: 3.070399 seconds
+Elapsed time, block LU: 4.569062 seconds
+ n = 2004
+Elapsed time, MKL LAPACK: 0.556629 seconds
+Elapsed time, naive LU: 24.198899 seconds
+Elapsed time, block LU: 30.410632 seconds
+ n = 3000
+Elapsed time, MKL LAPACK: 1.631081 seconds
+Elapsed time, naive LU: 79.910054 seconds
+Elapsed time, block LU: 111.366056 seconds
+ n = 4008
+Elapsed time, MKL LAPACK: 3.521384 seconds
+Elapsed time, naive LU: 190.167746 seconds
+Elapsed time, block LU: 249.470815 seconds
+ n = 5004
+Elapsed time, MKL LAPACK: 6.747189 seconds
+Elapsed time, naive LU: 375.413470 seconds
+Elapsed time, block LU: 469.624423 seconds
