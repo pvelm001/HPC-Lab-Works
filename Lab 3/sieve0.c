@@ -115,7 +115,7 @@ int main(int argc, char *argv[]) {
     elapsed_time += MPI_Wtime();
 
     /* Print the results */
-    if (!id) printf("Seive 0: The total number of prime: %ld, total time: %10.6f, total node %d\n", global_count, elapsed_time, p);
+    if (!id) printf("The total number of prime: %ld, total time: %10.6f, total node %d\n", global_count, elapsed_time, p);
     MPI_Finalize();
     return 0;
 }
