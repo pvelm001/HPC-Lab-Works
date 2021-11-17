@@ -69,6 +69,8 @@ int main (int argc, char *argv[])
       exit(1);
    }
 
+   proc0_size = (int) sqrt((double) n * 2);
+
    /* Allocate this process's share of the array. */
    marked = (char *) malloc(size);
    prime_marked = (char *) malloc(proc0_size);
@@ -104,6 +106,7 @@ int main (int argc, char *argv[])
       for (i = prime_first; i < proc0_size; i += prime) prime_marked[i] = 1;
       while (prime_marked[++index]);
       prime = index * 2 + 3;
+   
    } while (prime * prime <= n * 2);
 
    /* Count the number of unmarked numbers i.e, Primes in the local processor */
