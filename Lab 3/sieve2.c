@@ -81,24 +81,11 @@ int main (int argc, char *argv[])
    for (i = 0; i < size; i++) marked[i] = 0;
    for (i = 0; i < proc0_size; i++) prime_marked[i] = 0;
    
-   /* Sequentially mark primes < square root of n */
    index = 0;
    prime = 3;
    do {
       //Finding the first index of the prime multiple
-      first = (prime * prime - 3) / 2;
-      //Marking the prime multiples
-      for (i = first; i < proc0_size; i += prime) prime_marked[i] = 1;
-      while (prime_marked[++index]);
-      prime = index * 2 + 3;
-   } while (prime * prime <= proc0_size * 2 + 3);
-   
-   /* Parallelly mark primes */
-   index = 0;
-   prime = 3;
-   do {
-      //Finding the first index of the prime multiple
-      if (prime * prime > low_value)
+       if (prime * prime > low_value)
          first = (prime * prime - low_value) / 2;
       else {
          if (!(low_value % prime)) first = 0;
@@ -110,7 +97,11 @@ int main (int argc, char *argv[])
       }
       //Marking the prime multiples
       for (i = first; i < size; i += prime) marked[i] = 1;
-      while(prime_marked[++index]);
+
+      //Marking the prime multiples
+      prime_first = (prime * prime - 3) / 2;
+      for (i = prime_first; i < proc0_size; i += prime) prime_marked[i] = 1;
+      while (prime_marked[++index]);
       prime = index * 2 + 3;
    } while (prime * prime <= n * 2);
 
