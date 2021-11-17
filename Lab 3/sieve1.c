@@ -15,8 +15,8 @@ int main (int argc, char *argv[])
    int    id;           /* Process ID number */
    unsigned long int    index;        /* Index of current prime */
    unsigned long long int    low_value;    /* Lowest value on this proc */
-   char  *marked;       /* Portion of 2,...,'n' */
-   unsigned long long int    n;            /* Sieving from 2, ..., 'n' */
+   char  *marked;       /* Portion of 3,...,'n' */
+   unsigned long long int    n;            /* Sieving from 3, ..., 'n' */
    int    p;            /* Number of processes */
    unsigned long int    proc0_size;   /* Size of proc 0's subarray */
    unsigned long int    prime;        /* Current prime */
