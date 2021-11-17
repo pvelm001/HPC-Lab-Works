@@ -95,10 +95,10 @@ int main (int argc, char *argv[])
       prime = index * 2 + 3;
    } while (prime * prime <= n * 2);
    
-   int b = 1<<20; //Local Prime Block Size
+   int b = 1<<17; //Local Prime Block Size
    int currb_iter = 0;
 
-   int B = 1<<20; //Global Index Block Size
+   int B = 1<<17; //Global Index Block Size
    int currB_iter = 0;
 
    //Blocking Local Prime Array
