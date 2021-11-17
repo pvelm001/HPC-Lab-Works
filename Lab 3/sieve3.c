@@ -95,13 +95,11 @@ int main (int argc, char *argv[])
       prime = index * 2 + 3;
    } while (prime * prime <= n * 2);
    
-   int b = 10; //Local Prime Block Size
+   int b = 1024; //Local Prime Block Size
    int currb_iter = 0;
 
-   int B = 10; //Global Index Block Size
+   int B = 1024; //Global Index Block Size
    int currB_iter = 0;
-
-   if (!id) printf("Prime Numbers: ");
 
    //Blocking Local Prime Array
    do {
