@@ -17,6 +17,7 @@ int main (int argc, char *argv[])
    unsigned long int    count;        /* Local prime count */
    double elapsed_time; /* Parallel execution time */
    unsigned long int    first;        /* Index of first multiple */
+   unsigned long int    prime_first;        /* Index of first multiple */
    unsigned long int    global_count = 0; /* Global prime count */
    unsigned long long int    high_value;   /* Highest value on this proc */
    unsigned long int    i;
