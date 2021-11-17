@@ -88,7 +88,18 @@ int main (int argc, char *argv[])
    prime = 3;
    do {
       //Finding the first index of the prime multiple
-       if (prime * prime > low_value)
+      first = (prime * prime - 3) / 2;
+      //Marking the prime multiples
+      for (i = first; i < proc0_size; i += prime) prime_marked[i] = 1;
+      while (prime_marked[++index]);
+      prime = index * 2 + 3;
+   } while (prime * prime <= n * 2);
+   
+   index = 0;
+   prime = 3;
+   do {
+      //Finding the first index of the prime multiple
+      if (prime * prime > low_value)
          first = (prime * prime - low_value) / 2;
       else {
          if (!(low_value % prime)) first = 0;
@@ -100,13 +111,8 @@ int main (int argc, char *argv[])
       }
       //Marking the prime multiples
       for (i = first; i < size; i += prime) marked[i] = 1;
-
-      //Marking the prime multiples
-      prime_first = (prime * prime - 3) / 2;
-      for (i = prime_first; i < proc0_size; i += prime) prime_marked[i] = 1;
-      while (prime_marked[++index]);
+      while(prime_marked[++index]);
       prime = index * 2 + 3;
-   
    } while (prime * prime <= n * 2);
 
    /* Count the number of unmarked numbers i.e, Primes in the local processor */
