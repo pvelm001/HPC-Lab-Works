@@ -69,7 +69,7 @@ int main (int argc, char *argv[])
       exit(1);
    }
 
-   proc0_size = (int) sqrt((double) n * 2);
+   proc0_size = (int) sqrt((double) n * 2); //We need to mark the multiple of these
 
    /* Allocate this process's share of the array. */
    marked = (char *) malloc(size);
@@ -84,6 +84,7 @@ int main (int argc, char *argv[])
    for (i = 0; i < size; i++) marked[i] = 0;
    for (i = 0; i < proc0_size; i++) prime_marked[i] = 0;
    
+   /* Sequential Local Prime Marking */
    index = 0;
    prime = 3;
    do {
@@ -95,6 +96,7 @@ int main (int argc, char *argv[])
       prime = index * 2 + 3;
    } while (prime * prime <= n * 2);
    
+   /* Parallel Global Prime Marking */
    index = 0;
    prime = 3;
    do {
